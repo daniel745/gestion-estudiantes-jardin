@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestión de Alumnos en Salones{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Gestión de Alumnos en Salones</h1>
+    <a href="{{ path('app_salones') }}" class="btn btn-primary mb-3">Volver a Gestión Salones</a>
+    <a href="{{ path('app_estudiantes') }}" class="btn btn-primary mb-3">Volver a Gestión Estudiantes</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre del Salón</th>
+                <th>Total Estudiantes</th>
+                <th>Gestionar</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-salones">
+            <!-- Se llena en JS -->
+        </tbody>
+    </table>
+
+    <a href="{{ path('index') }}" class="btn btn-warning mb-3">Volver al Menu Principal</a>
+</div>
+
+<!-- Modal para agregar estudiante -->
+<div class="modal fade" id="modalEstudiantesAgregar" tabindex="-1" aria-labelledby="modalEstudianteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="TituloAgregarEstudiantes">Asignar Estudiante a Salón</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <select id="select-estudiante" class="form-select">
+                    <!-- Se llenan los estudiantes con JS -->
+                </select>
+                
+                <!-- Mover el contenedor de estudiantes aquí -->
+                <div id="contenedorEstudiantesAgregar"></div>  
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="asignarEstudiante()">Asignar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        cargarSalones();
+    });
+
+    function cargarSalones() {
+        fetch("http://127.0.0.1:8000/salones/reporte")
+            .then(response => response.json())
+            .then(data => {
+                let tabla = document.getElementById("tabla-salones");
+                tabla.innerHTML = data.data.map(salon => `
+                    <tr>
+                        <td>${salon.id}</td>
+                        <td>${salon.nombre_salon}</td>
+                        <td>${salon.totalEstudiantes}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="mostrarFormulario(${salon.id})" data-bs-toggle="modal" data-bs-target="#modalEstudiantesAgregar">Gestionar Estudiantes</button>
+                        </td>
+                    </tr>
+                `).join("");
+            })
+            .catch(error => console.error("Error cargando salones:", error));
+    }
+
+    function abrirModalAgregar(idSalon) {
+        document.getElementById("salonId").value = idSalon;
+        new bootstrap.Modal(document.getElementById("modalAgregar")).show();
+    }
+
+    function mostrarFormulario(salonId) {
+        fetch("http://127.0.0.1:8000/estudiantes/buscar")
+            .then(response => response.json())
+            .then(data => {
+                let select = document.getElementById("select-estudiante");
+                select.innerHTML = data.length > 0 
+                    ? data.map(est => `<option value="${est.id}">${est.nombre}</option>`).join("")
+                    : `<option disabled>No hay estudiantes disponibles</option>`;
+                select.dataset.salonId = salonId;
+            })
+            .catch(error => console.error("Error cargando estudiantes:", error));
+
+        fetch(`/salones/estudiantePorSalon/${salonId}`)
+            .then(response => response.json())
+            .then(data => {
+                let contenedor = document.getElementById("contenedorEstudiantesAgregar");
+                let titulo = document.getElementById("TituloAgregarEstudiantes");
+                contenedor.innerHTML = "";
+
+                if (!data.data || data.data.length === 0) { 
+                    contenedor.innerHTML = `<p class="text-center text-danger">No hay estudiantes en este salón</p>`;
+                } else {
+                    let tabla = `
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Edad</th>
+                                    <th>Acudiente</th>
+                                    <th>Género</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.data.forEach(est => {
+                        tabla += `
+                            <tr>
+                                <td>${est.nombre}</td>
+                                <td>${est.edad} años</td>
+                                <td>${est.acudiente}</td>
+                                <td>${est.genero}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="eliminarEstudiante(${est.id}, ${salonId})">Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    let nombreSalon = data.data[0].nombre_salon || null;
+                    titulo.innerHTML = `<h5 class="modal-title">Estudiantes del Salón ${nombreSalon}</h5>`;
+
+                    tabla += `</tbody></table>`;
+                    contenedor.innerHTML = tabla;
+                }
+
+                new bootstrap.Modal(document.getElementById("modalEstudiantesAgregar")).show();
+            })
+        .catch(error => console.error("Error cargando estudiantes:", error));
+    }
+
+
+    function asignarEstudiante() {
+        let estudianteId = document.getElementById("select-estudiante").value;
+        let salonId = document.getElementById("select-estudiante").dataset.salonId;
+
+        fetch(`http://127.0.0.1:8000/estudiantes/asignar-salon/${estudianteId}/${salonId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let modal = bootstrap.Modal.getInstance(document.getElementById("modalEstudiantesAgregar"));
+            if (modal) modal.hide();
+            document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+
+            // Volver a cargar la lista de estudiantes en el modal
+            mostrarFormulario(salonId)
+        })
+        .catch(error => console.error("Error asignando estudiante:", error));
+    }
+
+    function eliminarEstudiante(idEstudiante, idSalon) {
+        if (!confirm("¿Seguro que deseas eliminar este estudiante?")) return;
+        url = `http://127.0.0.1:8000/estudiantes/remover-salon/${idEstudiante}/${idSalon}`
+        console.log(url)
+        fetch(url, { method: "DELETE" })
+            .then(response => response.json())
+            .then(() => {
+                alert("Estudiante desvinculado de clase");
+                
+                let modal = bootstrap.Modal.getInstance(document.getElementById("modalEstudiantesAgregar"));
+                if (modal) modal.hide();
+                
+                document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+
+                // Volver a cargar la lista de estudiantes en el modal
+                mostrarFormulario(idSalon)
+            })
+            .catch(error => console.error("Error eliminando estudiante:", error));
+    }
+
+
+    document.addEventListener("hidden.bs.modal", function () {
+        document.body.classList.remove("modal-open");
+        document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+    });
+</script>
+
+{% endblock %}

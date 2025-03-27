@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestión de Jardín Infantil{% endblock %}
+
+{% block body %}
+
+{% if app.user %}
+    <form action="{{ path('logout') }}" method="post">
+        <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+    </form>
+{% endif %}
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="row text-center">
+        <h1 class="mb-4">Bienvenido al Sistema de Gestión Para Jardín Infantil</h1>
+
+        <div class="col-md-4 mb-3">
+            <a href="{{ path('app_estudiantes') }}" class="btn btn-primary btn-lg w-100 p-4">
+                Gestión de Estudiantes
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <a href="{{ path('app_salones') }}" class="btn btn-success btn-lg w-100 p-4">
+                Gestión de Salones
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{{ path('app_salon_asignado') }}" class="btn btn-warning btn-lg w-100 p-4">
+                Gestionar Alumnos en Salones
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

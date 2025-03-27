@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Estudiantes{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Lista de Estudiantes</h1>
+    <a href="{{ path('app_estudiantes_nuevo') }}" class="btn btn-primary mb-3">Agregar Estudiante</a>
+    <a href="{{ path('app_salon_asignado') }}" class="btn btn-primary mb-3">Gestionar alumnos en salones</a>
+    
+    <form id="formBusqueda" class="row mb-3">
+        <div class="col-md-3">
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre" class="form-control mb-2">
+        </div>
+
+        <div class="col-md-3">
+            <input type="text" id="acudiente" name="acudiente" placeholder="Acudiente" class="form-control mb-2">
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" id="edad" name="edad" placeholder="Edad" class="form-control mb-2">
+        </div>
+
+        <div class="col-md-2">
+            <select id="genero" name="genero" class="form-control mb-2">
+                <option value="">Todos</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Género</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-estudiantes">
+            <!-- Se llena en el script -->
+        </tbody>
+    </table>
+
+    <a href="{{ path('index') }}" class="btn btn-warning mb-3">Volver al Menu Principal</a>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {;
+        cargarEstudiantes();
+    })
+
+        document.getElementById("formBusqueda").addEventListener("submit", function (event) {
+        event.preventDefault(); 
+        buscarEstudiantes();
+    });
+
+    function buscarEstudiantes() {
+        let nombre = document.getElementById("nombre").value;
+        let acudiente = document.getElementById("acudiente").value;
+        let edad = document.getElementById("edad").value;
+        let genero = document.getElementById("genero").value;
+
+        let url = new URL("http://127.0.0.1:8000/estudiantes/buscar");
+        if (nombre) url.searchParams.append("nombre", nombre);
+        if (acudiente) url.searchParams.append("acudiente", acudiente);
+        if (edad) url.searchParams.append("edad", edad);
+        if (genero) url.searchParams.append("genero", genero);
+
+        fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error("No se encontraron estudiantes");
+            return response.json();
+        })
+        .then(data => {
+            let tabla = document.getElementById("tabla-estudiantes");
+            tabla.innerHTML = data.map(estudiante => `
+                <tr>
+                    <td>${estudiante.id}</td>
+                    <td>${estudiante.nombre}</td>
+                    <td>${estudiante.edad}</td>
+                    <td>${estudiante.genero}</td>
+                    <td>
+                        <a href="/estudiantes/cambiar/${estudiante.id}" class="btn btn-warning btn-sm">Editar</a>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarEstudiante(${estudiante.id})">Eliminar</button>
+                    </td>
+                </tr>
+            `).join("");
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("tabla-estudiantes").innerHTML = `<tr><td colspan="5">No se encontraron resultados</td></tr>`;
+        });
+    }
+
+    function cargarEstudiantes() {
+
+        fetch("http://127.0.0.1:8000/estudiantes/obtener")
+            .then(response => response.json())
+            .then(data => {
+
+                let tabla = document.getElementById("tabla-estudiantes");
+                tabla.innerHTML = data.map(estudiante => `
+                    <tr>
+                        <td>${estudiante.id}</td>
+                        <td>${estudiante.nombre}</td>
+                        <td>${estudiante.edad}</td>
+                        <td>${estudiante.genero}</td>
+                        <td>
+                            <a href="/estudiantes/cambiar/${estudiante.id}" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarEstudiante(${estudiante.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `).join("");
+            })
+            .catch(error => console.error("Error cargando estudiantes:", error));
+    }
+
+
+
+    function eliminarEstudiante(id) {
+        if (confirm("¿Seguro que deseas eliminar este estudiante?")) {
+            fetch(`http://127.0.0.1:8000/estudiantes/eliminar/${id}`, { method: "DELETE" })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error al eliminar estudiante");
+                    alert("Estudiante eliminado exitosamente");
+                    cargarEstudiantes();
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    }
+</script>
+{% endblock %}

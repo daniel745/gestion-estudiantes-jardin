@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Crear Nuevo Salon{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Agregar Salon</h1>
+    
+    <form id="form-salon">
+        <div class="mb-3">
+            <label class="form-label">Nombre de Salon</label>
+            <input type="text" class="form-control" id="nombre_salon" required>
+        </div>
+        <button type="submit" class="btn btn-success" id="btn-guardar" disabled=true>Guardar</button>
+        <a href="{{ path('app_salones') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script>
+    document.getElementById("form-salon").addEventListener("submit", function(event) {
+        event.preventDefault();
+        
+        let salon = {
+            nombre_salon: document.getElementById("nombre_salon").value,
+        };
+
+        fetch("http://127.0.0.1:8000/salones/crear", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(salon)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Salon agregado exitosamente");
+            window.location.href = "/salones";
+        })
+        .catch(error => alert("Error al agregar nuevo salon"));
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("form-salon");
+        const button = document.getElementById("btn-guardar");
+
+        function validarFormulario() {
+            button.disabled = !form.checkValidity();
+        }
+
+        form.addEventListener("input", validarFormulario);
+    });
+
+</script>
+{% endblock %}

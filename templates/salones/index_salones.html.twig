@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Salones Index{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Lista de Salones</h1>
+    <a href="{{ path('app_salon_nuevo') }}" class="btn btn-primary mb-3">Crear Nuevo Salon</a>
+    <a href="{{ path('app_salon_asignado') }}" class="btn btn-primary mb-3">Gestionar alumnos en salones</a>
+    
+    <form id="formBusqueda" class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="nombre_salon" name="nombre_salon" placeholder="Nombre de Salon" class="form-control mb-2">
+        </div>
+
+        <div class="col-md-6">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre Salon</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-salones">
+            <!-- Se llena en el script -->
+        </tbody>
+    </table>
+    <a href="{{ path('index') }}" class="btn btn-warning mb-3">Volver al Menu Principal</a>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {;
+        cargarSalones();
+    })
+
+        document.getElementById("formBusqueda").addEventListener("submit", function (event) {
+        event.preventDefault(); 
+        buscarSalones();
+    });
+
+    function buscarSalones() {
+        let nombre_salon = document.getElementById("nombre_salon").value;
+
+        let url = new URL("http://127.0.0.1:8000/salones/buscar");
+        if (nombre_salon) url.searchParams.append("nombre_salon", nombre_salon);
+
+        fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error("No se encontraron Salones");
+            return response.json();
+        })
+        .then(data => {
+            let tabla = document.getElementById("tabla-salones");
+            tabla.innerHTML = data.map(salon => `
+                <tr>
+                    <td>${salon.id}</td>
+                    <td>${salon.nombre_salon}</td>
+                    <td>
+                        <a href="/salones/cambiar/${salon.id}" class="btn btn-warning btn-sm">Editar</a>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarSalon(${salon.id})">Eliminar</button>
+                    </td>
+                </tr>
+            `).join("");
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("tabla-salones").innerHTML = `<tr><td colspan="5">No se encontraron resultados</td></tr>`;
+        });
+    }
+
+    function cargarSalones() {
+
+        fetch("http://127.0.0.1:8000/salones/obtener")
+            .then(response => response.json())
+            .then(data => {
+
+                let tabla = document.getElementById("tabla-salones");
+                tabla.innerHTML = data.map(salon => `
+                    <tr>
+                        <td>${salon.id}</td>
+                        <td>${salon.nombre_salon}</td>
+                        <td>
+                            <a href="/salones/cambiar/${salon.id}" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarSalon(${salon.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `).join("");
+            })
+            .catch(error => console.error("Error cargando salones:", error));
+    }
+
+
+
+    function eliminarSalon(id) {
+        if (confirm("¿Seguro que deseas eliminar este salon?")) {
+            fetch(`http://127.0.0.1:8000/salones/eliminar/${id}`, { method: "DELETE" })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error al eliminar salon");
+                    alert("Salon eliminado exitosamente");
+                    cargarSalones();
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    }
+</script>
+{% endblock %}

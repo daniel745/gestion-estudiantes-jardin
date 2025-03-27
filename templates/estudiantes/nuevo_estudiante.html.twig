@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Crear Nuevo Estudiantes{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Agregar Estudiante</h1>
+    
+    <form id="form-estudiante">
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Edad</label>
+            <input type="number" class="form-control" id="edad" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Género</label>
+            <select class="form-control" id="genero" required>
+                <option value="">Seleccione...</option>
+                <option value="MASCULINO">MASCULINO</option>
+                <option value="FEMENINO">FEMENINO</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Acudiente</label>
+            <input type="text" class="form-control" id="acudiente" required>
+        </div>
+        <button type="submit" class="btn btn-success" id="btn-guardar" disabled=true>Guardar</button>
+        <a href="{{ path('app_estudiantes') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script>
+    document.getElementById("form-estudiante").addEventListener("submit", function(event) {
+        event.preventDefault();
+        
+        let estudiante = {
+            nombre: document.getElementById("nombre").value,
+            edad: document.getElementById("edad").value,
+            genero: document.getElementById("genero").value,
+            acudiente: document.getElementById("acudiente").value
+        };
+
+        fetch("http://127.0.0.1:8000/estudiantes/crear", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(estudiante)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Estudiante agregado exitosamente");
+            window.location.href = "/estudiantes";
+        })
+        .catch(error => alert("Error al agregar nuevo estudiante"));
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("form-estudiante");
+        const button = document.getElementById("btn-guardar");
+
+        function validarFormulario() {
+            button.disabled = !form.checkValidity();
+        }
+
+        form.addEventListener("input", validarFormulario);
+    });
+
+</script>
+{% endblock %}
