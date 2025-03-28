@@ -22,6 +22,10 @@
         </tbody>
     </table>
 
+    <button id="descargarExcel" class="btn btn-success btn-sm mb-3">Descargar Reporte Excel</button> 
+
+    <br>
+
     <a href="{{ path('index') }}" class="btn btn-warning mb-3">Volver al Menu Principal</a>
 </div>
 
@@ -184,6 +188,9 @@
             .catch(error => console.error("Error eliminando estudiante:", error));
     }
 
+    document.getElementById("descargarExcel").addEventListener("click", function () {
+        window.location.href = `${apiUrl}/salones/reporte/excel`;
+    });
 
     document.addEventListener("hidden.bs.modal", function () {
         document.body.classList.remove("modal-open");

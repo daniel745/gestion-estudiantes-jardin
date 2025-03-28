@@ -10,6 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route('/salones')]
 class SalonController extends AbstractController
@@ -125,6 +129,42 @@ class SalonController extends AbstractController
         return $this->json([
             'message' => 'Reporte generado exitosamente',
             'data' => $reporte
+        ]);
+    }
+
+    #[Route('/reporte/excel', name: 'reporte_salones_excel')]
+    public function generarReporteExcel(SalonService $salonService): Response
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'ID Salón');
+        $sheet->setCellValue('B1', 'Nombre del Salón');
+        $sheet->setCellValue('C1', 'Total Estudiantes');
+
+        $data = $salonService->contarEstudiantesPorSalon();
+        if (empty($data)) {
+            return $this->json(['message' => 'No hay datos para generar el reporte'], 404);
+        }
+        
+
+        $row = 2;
+        foreach ($data as $salon) {
+            $sheet->setCellValue("A$row", $salon['id']);
+            $sheet->setCellValue("B$row", $salon['nombre_salon']);
+            $sheet->setCellValue("C$row", $salon['totalEstudiantes']);
+            $row++;
+        }
+
+        $fileName = 'reporte_salones.xlsx';
+        $filePath = sys_get_temp_dir() . '/' . $fileName;
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return new BinaryFileResponse($filePath, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
         ]);
     }
 

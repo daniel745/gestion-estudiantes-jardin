@@ -17,7 +17,7 @@
             
             let apiUrl = "{{ app.request.getSchemeAndHttpHost() }}";
 
-            if (!apiUrl.includes("localhost")) {
+            if (!apiUrl.includes("localhost") && !apiUrl.includes("127.0.0.1")) {
                 apiUrl = apiUrl.replace("http://", "https://");
             }
 
