@@ -17,6 +17,9 @@
 </div>
 
 <script>
+
+    const apiUrl = process.env.API_BASE_URL
+
     document.getElementById("form-salon").addEventListener("submit", function(event) {
         event.preventDefault();
         
@@ -24,7 +27,7 @@
             nombre_salon: document.getElementById("nombre_salon").value,
         };
 
-        fetch("http://127.0.0.1:8000/salones/crear", {
+        fetch("${apiUrl}/salones/crear", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(salon)
