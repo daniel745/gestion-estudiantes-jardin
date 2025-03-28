@@ -14,7 +14,13 @@
         {% block body %}{% endblock %}
 
         <script>
+            
             const apiUrl = "{{ app.request.getSchemeAndHttpHost() }}";
+
+            if (!apiUrl.includes("localhost")) {
+                apiUrl = apiUrl.replace("http://", "https://");
+            }
+
         </script>
 
         <!-- Bootstrap JS -->
