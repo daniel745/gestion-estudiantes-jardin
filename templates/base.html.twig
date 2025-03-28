@@ -15,7 +15,7 @@
 
         <script>
             
-            const apiUrl = "{{ app.request.getSchemeAndHttpHost() }}";
+            let apiUrl = "{{ app.request.getSchemeAndHttpHost() }}";
 
             if (!apiUrl.includes("localhost")) {
                 apiUrl = apiUrl.replace("http://", "https://");
