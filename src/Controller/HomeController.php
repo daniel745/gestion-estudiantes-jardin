@@ -15,5 +15,12 @@ class HomeController extends AbstractController
     {
         return $this->render('index.html.twig');
     }
+
+    #[Route('/index', name: 'homepage')]
+    #[IsGranted('ROLE_USER')]
+    public function homePage(): Response
+    {
+        return $this->render('index.html.twig');
+    }
 }
 ?>
