@@ -50,12 +50,15 @@
 </div>
 
 <script>
+
+    const apiUrl = process.env.API_BASE_URL
+
     document.addEventListener("DOMContentLoaded", function () {
         cargarSalones();
     });
 
     function cargarSalones() {
-        fetch("http://127.0.0.1:8000/salones/reporte")
+        fetch("${apiUrl}/salones/reporte")
             .then(response => response.json())
             .then(data => {
                 let tabla = document.getElementById("tabla-salones");
@@ -79,7 +82,7 @@
     }
 
     function mostrarFormulario(salonId) {
-        fetch("http://127.0.0.1:8000/estudiantes/buscar")
+        fetch("${apiUrl}/estudiantes/buscar")
             .then(response => response.json())
             .then(data => {
                 let select = document.getElementById("select-estudiante");
@@ -145,7 +148,7 @@
         let estudianteId = document.getElementById("select-estudiante").value;
         let salonId = document.getElementById("select-estudiante").dataset.salonId;
 
-        fetch(`http://127.0.0.1:8000/estudiantes/asignar-salon/${estudianteId}/${salonId}`, {
+        fetch(`${apiUrl}/estudiantes/asignar-salon/${estudianteId}/${salonId}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" }
         })
@@ -163,7 +166,7 @@
 
     function eliminarEstudiante(idEstudiante, idSalon) {
         if (!confirm("¿Seguro que deseas eliminar este estudiante?")) return;
-        url = `http://127.0.0.1:8000/estudiantes/remover-salon/${idEstudiante}/${idSalon}`
+        url = `${apiUrl}/estudiantes/remover-salon/${idEstudiante}/${idSalon}`
         console.log(url)
         fetch(url, { method: "DELETE" })
             .then(response => response.json())

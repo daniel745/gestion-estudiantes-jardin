@@ -54,6 +54,8 @@
 
 <script>
 
+    const apiUrl = process.env.API_BASE_URL
+
     document.addEventListener("DOMContentLoaded", function () {;
         cargarEstudiantes();
     })
@@ -69,7 +71,7 @@
         let edad = document.getElementById("edad").value;
         let genero = document.getElementById("genero").value;
 
-        let url = new URL("http://127.0.0.1:8000/estudiantes/buscar");
+        let url = new URL("${apiUrl}/estudiantes/buscar");
         if (nombre) url.searchParams.append("nombre", nombre);
         if (acudiente) url.searchParams.append("acudiente", acudiente);
         if (edad) url.searchParams.append("edad", edad);
@@ -103,7 +105,7 @@
 
     function cargarEstudiantes() {
 
-        fetch("http://127.0.0.1:8000/estudiantes/obtener")
+        fetch("${apiUrl}/estudiantes/obtener")
             .then(response => response.json())
             .then(data => {
 
@@ -128,7 +130,7 @@
 
     function eliminarEstudiante(id) {
         if (confirm("¿Seguro que deseas eliminar este estudiante?")) {
-            fetch(`http://127.0.0.1:8000/estudiantes/eliminar/${id}`, { method: "DELETE" })
+            fetch(`${apiUrl}/estudiantes/eliminar/${id}`, { method: "DELETE" })
                 .then(response => {
                     if (!response.ok) throw new Error("Error al eliminar estudiante");
                     alert("Estudiante eliminado exitosamente");

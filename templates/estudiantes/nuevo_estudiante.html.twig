@@ -33,6 +33,9 @@
 </div>
 
 <script>
+
+    const apiUrl = process.env.API_BASE_URL
+
     document.getElementById("form-estudiante").addEventListener("submit", function(event) {
         event.preventDefault();
         
@@ -43,7 +46,7 @@
             acudiente: document.getElementById("acudiente").value
         };
 
-        fetch("http://127.0.0.1:8000/estudiantes/crear", {
+        fetch("${apiUrl}/estudiantes/crear", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(estudiante)
