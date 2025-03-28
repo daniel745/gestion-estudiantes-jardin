@@ -54,7 +54,7 @@
 
 <script>
 
-    const apiUrl = process.env.API_BASE_URL
+
 
     document.addEventListener("DOMContentLoaded", function () {;
         cargarEstudiantes();
@@ -105,7 +105,7 @@
 
     function cargarEstudiantes() {
 
-        fetch("${apiUrl}/estudiantes/obtener")
+        fetch(`${apiUrl}/estudiantes/obtener`)
             .then(response => response.json())
             .then(data => {
 

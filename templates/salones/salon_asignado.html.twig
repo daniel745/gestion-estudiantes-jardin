@@ -51,14 +51,14 @@
 
 <script>
 
-    const apiUrl = process.env.API_BASE_URL
+
 
     document.addEventListener("DOMContentLoaded", function () {
         cargarSalones();
     });
 
     function cargarSalones() {
-        fetch("${apiUrl}/salones/reporte")
+        fetch(`${apiUrl}/salones/reporte`)
             .then(response => response.json())
             .then(data => {
                 let tabla = document.getElementById("tabla-salones");
@@ -82,7 +82,7 @@
     }
 
     function mostrarFormulario(salonId) {
-        fetch("${apiUrl}/estudiantes/buscar")
+        fetch(`${apiUrl}/estudiantes/buscar`)
             .then(response => response.json())
             .then(data => {
                 let select = document.getElementById("select-estudiante");

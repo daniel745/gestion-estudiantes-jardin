@@ -34,7 +34,7 @@
 
 <script>
 
-    const apiUrl = process.env.API_BASE_URL
+
 
     document.addEventListener("DOMContentLoaded", function () {;
         cargarSalones();
@@ -77,7 +77,7 @@
 
     function cargarSalones() {
 
-        fetch("${apiUrl}/salones/obtener")
+        fetch(`${apiUrl}/salones/obtener`)
             .then(response => response.json())
             .then(data => {
 

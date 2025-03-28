@@ -18,7 +18,7 @@
 
 <script>
 
-    const apiUrl = process.env.API_BASE_URL
+
 
     document.addEventListener("DOMContentLoaded", function () {;
         cargarFormulario({{id}});
@@ -27,7 +27,7 @@
     function cargarFormulario(id){
 
 
-        fetch("${apiUrl}/salones/buscar?id={{id}}")
+        fetch(`${apiUrl}/salones/buscar?id={{id}}`)
         .then(response => response.json())
         .then(data => {
             data.map(salon=>{
@@ -44,7 +44,7 @@
             nombre_salon: document.getElementById("nombre_salon").value,
         };
 
-        fetch("${apiUrl}/salones/editar/{{id}}", {
+        fetch(`${apiUrl}/salones/editar/{{id}}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(salon)
